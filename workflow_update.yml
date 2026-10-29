@@ -1,0 +1,48 @@
+name: Update NEL Player Lab
+
+on:
+  schedule:
+    - cron: '0 14 * * 2'   # Tuesday 14:00 UTC (9-10 am US time), after Monday night football
+    - cron: '0 22 * * 2'   # Tuesday evening, a second try in case the data posted late
+    - cron: '0 23 * * 5'   # Friday evening, after the injury reports come out
+  workflow_dispatch:        # lets you press "Run workflow" by hand
+  push:                     # rebuilds when you edit your rosters or the code
+    branches: [main]
+    paths: ['rosters.json', 'update_lab.py', 'lab_template.html', 'model.json', 'analog.json']
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python update_lab.py
+      - run: |
+          mkdir site
+          cp NEL_Player_Lab.html site/index.html
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
