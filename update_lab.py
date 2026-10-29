@@ -237,7 +237,7 @@ if not season_over:
         if team in sched: s = sched[team]; entry.update(opp=s['opp'], home=s['home'], spread=s['spread'], total=s['total'], day=s['day'])
         else: entry['bye'] = True
         p['proj'] = entry; cnt += 1
-    keep = ('center', 'coef_noline', 'coef_line', 'rq', 'avail', 'cv', 'ros_check', 'seasons', 'n_train')
+    keep = ('center', 'coef_noline', 'coef_line', 'rq', 'avail', 'cv', 'ros_check', 'seasons', 'n_train', 'weekly_sd', 'persist_sd')
     data.update(defs=defs, sched=sched, ros=ros, adj=adj, adjp=adjp, adjn=adjn, adjg=adjg, tr=tr, model={k: MODEL[k] for k in keep}, analog=ANALOG)
     print(f'  projected {cnt} players; byes this week: {sorted(set(defs) - set(sched)) or "none"}')
 else:

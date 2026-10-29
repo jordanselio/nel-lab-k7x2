@@ -118,6 +118,10 @@ dialog::backdrop{background:rgba(8,14,20,.55)}
 tr.mine td{background:var(--me)}
 td.lk{font-weight:600}
 .big{font-family:var(--display);font-size:46px;font-weight:700;line-height:1}
+.pick{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:8px;align-items:center;padding:5px 2px;border-bottom:1px solid var(--rule);cursor:pointer}
+.pick .pn{font-weight:600}.pick .pv{font-variant-numeric:tabular-nums;font-weight:600;min-width:34px;text-align:right}
+.picks{max-height:360px;overflow:auto}
+.gradeL{font-family:var(--display);font-size:78px;font-weight:700;line-height:1}
 .why ul{margin:0;padding-left:18px}.why li{margin:4px 0;max-width:90ch}
 td.zero{color:var(--down);font-weight:700}
 @media (max-width:900px){
@@ -141,7 +145,7 @@ td.zero{color:var(--down);font-weight:700}
     <div class="side-top">
       <div class="brand">NEL player lab</div>
       <div class="sub" id="asof"></div>
-      <div class="modes" id="modes" role="group" aria-label="View"><button type="button" data-mode="players" aria-pressed="true">Players</button><button type="button" data-mode="defs" aria-pressed="false">Defenses</button><button type="button" data-mode="odds" aria-pressed="false">Odds</button></div>
+      <div class="modes" id="modes" role="group" aria-label="View"><button type="button" data-mode="players" aria-pressed="true">Players</button><button type="button" data-mode="defs" aria-pressed="false">Defenses</button><button type="button" data-mode="odds" aria-pressed="false">Odds</button><button type="button" data-mode="trades" aria-pressed="false">Trades</button></div>
       <input class="search" id="q" type="search" placeholder="Search a player or NFL team" aria-label="Search players">
       <div class="chips" id="poschips" role="group" aria-label="Position"></div>
       <div class="selects">
@@ -626,7 +630,7 @@ function setMode(m){
   $('#sort').innerHTML=pm?PSORT_HTML:Object.entries(DSORT).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join('');
   $('#sort').value=pm?state.sort:state.sortD;
   renderList();
-  if(m==='players'&&state.sel) renderDetail(byId[state.sel]); else if(m==='defs'&&state.selDef) renderDefense(state.selDef); else if(m==='odds') renderOddsView();
+  if(m==='players'&&state.sel) renderDetail(byId[state.sel]); else if(m==='defs'&&state.selDef) renderDefense(state.selDef); else if(m==='odds') renderOddsView(); else if(m==='trades') renderTradeView();
 }
 function renderDefList(){
   const a=Object.keys(D.defs).filter(c=>!state.q||c.toLowerCase()===state.q||TEAMS[c].toLowerCase().includes(state.q));
@@ -837,6 +841,222 @@ document.addEventListener('input',e=>{
   if(b.dataset.scope==='card'){ const p=byId[state.sel]; if(p) fillOdds(p); } else renderFinderOut();
 });
 if(!AN){ const ob=document.querySelector('[data-mode=odds]'); if(ob) ob.style.display='none'; }
+if(!M){ const tb=document.querySelector('[data-mode=trades]'); if(tb) tb.style.display='none'; }
+
+/* ================= trade lab: grade a trade, find a trade ================= */
+const NSIM=300, ZERO_SW={QB:0,RB:0,WR:0,TE:0};
+let TL=null;
+const sdLn=s=>Math.sqrt(Math.log(1+s*s));
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
+function tlInit(){
+  if(TL&&TL.key===state.w) return TL;
+  const nW=D.last-WK+1, pd=new Map(), list=[];
+  for(const p of P){
+    if(p.ft==='Free Agent'||!p.proj||!p.proj.base||!M) continue; const c=rosCalc(p,state.w); if(!c) continue;
+    const mu=new Float64Array(nW), pr=new Float64Array(nW), e=new Float64Array(nW);
+    c.rows.forEach((r,i)=>{ if(!r.bye){ mu[i]=r.mu; pr[i]=r.P; e[i]=r.mu*r.P; } });
+    const o={p,id:p.id,pos:p.pos,mu,pr,e,rosE:c.total,healthy:c.healthy,po:c.playoff,idx:list.length,sg:sdLn(M.persist_sd[p.pos]),team:p.ft,byes:c.rows.filter(r=>r.bye).map(r=>r.w)};
+    pd.set(p.id,o); list.push(o);
+  }
+  const nP=list.length, nT=D.teams.length, rnd=mulberry(12345), N=NSIM;
+  const Zs=new Float32Array(nP*N), Ua=new Float32Array(nP*nW*N), Zw=new Float32Array(nT*nW*N);
+  const gauss=()=>{ let u=0; while(!u) u=rnd(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*rnd()); };
+  for(let i=0;i<Zs.length;i++) Zs[i]=gauss(); for(let i=0;i<Ua.length;i++) Ua[i]=rnd(); for(let i=0;i<Zw.length;i++) Zw[i]=gauss();
+  TL={key:state.w,nW,pd,list,Zs,Ua,Zw,N,teamIdx:Object.fromEntries(D.teams.map((t,i)=>[t,i])),isPO:Array.from({length:nW},(_,t)=>D.playoff.includes(WK+t))};
+  return TL;
+}
+const rosterOf=team=>tlInit().list.filter(o=>o.team===team);
+const BUF={QB:new Float64Array(40),RB:new Float64Array(40),WR:new Float64Array(40),TE:new Float64Array(40)}, BUF2={QB:new Float64Array(40),RB:new Float64Array(40),WR:new Float64Array(40),TE:new Float64Array(40)}, CNT={QB:0,RB:0,WR:0,TE:0};
+/* BUF holds the number used to pick the lineup (expected points); BUF2 holds what that player actually scores in this simulation */
+function addV(pos,v,sv){ const b=BUF[pos], b2=BUF2[pos]; let n=CNT[pos]++; while(n>0&&b[n-1]<v){ b[n]=b[n-1]; b2[n]=b2[n-1]; n--; } b[n]=v; b2[n]=sv; }
+let L_SUM=0, L_SQ=0;
+/* lineup: 1 QB, 2 RB, 2 WR, 1 TE, 1 FLEX (RB/WR/TE). Buckets are sorted best first. */
+function lineupFromBuf(sw){
+  const q=BUF.QB,r=BUF.RB,w=BUF.WR,t=BUF.TE, q2=BUF2.QB,r2=BUF2.RB,w2=BUF2.WR,t2=BUF2.TE; let sum=0,sq=0,z;
+  if(CNT.QB>0){ sum+=q2[0]; z=q2[0]*sw.QB; sq+=z*z; }
+  for(let i=0;i<2&&i<CNT.RB;i++){ sum+=r2[i]; z=r2[i]*sw.RB; sq+=z*z; }
+  for(let i=0;i<2&&i<CNT.WR;i++){ sum+=w2[i]; z=w2[i]*sw.WR; sq+=z*z; }
+  if(CNT.TE>0){ sum+=t2[0]; z=t2[0]*sw.TE; sq+=z*z; }
+  let fx=0,fp=null,fi=0; if(CNT.RB>2&&r[2]>fx){fx=r[2];fp='RB';fi=r2[2];} if(CNT.WR>2&&w[2]>fx){fx=w[2];fp='WR';fi=w2[2];} if(CNT.TE>1&&t[1]>fx){fx=t[1];fp='TE';fi=t2[1];}
+  if(fp){ sum+=fi; z=fi*sw[fp]; sq+=z*z; }
+  L_SUM=sum; L_SQ=sq;
+}
+/* quick expected-value version (no randomness): used to search many trades fast */
+function detTeam(list){
+  const T=TL, nW=T.nW; let total=0, po=0;
+  for(let t=0;t<nW;t++){ CNT.QB=CNT.RB=CNT.WR=CNT.TE=0; for(let j=0;j<list.length;j++){ const e=list[j].e[t]; if(e>0) addV(list[j].pos,e,e); } lineupFromBuf(ZERO_SW); total+=L_SUM; if(T.isPO[t]) po+=L_SUM; }
+  return {total,po};
+}
+/* full simulation: players miss games at their historical rates, carry season-long hot/cold streaks, and have weekly luck */
+function simTeam(list,tIdx){
+  const T=tlInit(), N=T.N, nW=T.nW, tot=new Float64Array(N), wk=new Float64Array(nW), sc=new Float64Array(list.length); let po=0;
+  for(let s=0;s<N;s++){
+    for(let j=0;j<list.length;j++){ const q=list[j]; sc[j]=Math.exp(q.sg*T.Zs[q.idx*N+s]-q.sg*q.sg/2); }
+    let total=0;
+    for(let t=0;t<nW;t++){
+      CNT.QB=CNT.RB=CNT.WR=CNT.TE=0;
+      for(let j=0;j<list.length;j++){ const q=list[j], m=q.mu[t]; if(m<=0) continue; if(T.Ua[(q.idx*nW+t)*N+s]>=q.pr[t]) continue; addV(q.pos,m,m*sc[j]); }
+      lineupFromBuf(M.weekly_sd);
+      const v=L_SUM+Math.sqrt(L_SQ)*T.Zw[(tIdx*nW+t)*N+s];
+      total+=v; wk[t]+=v/N; if(T.isPO[t]) po+=v/N;
+    }
+    tot[s]=total;
+  }
+  let mean=0; for(let s=0;s<N;s++) mean+=tot[s]; mean/=N;
+  return {tot,mean,wk,po};
+}
+function startCounts(list){
+  const nW=TL.nW, cnt=new Map();
+  for(let t=0;t<nW;t++){
+    const by={QB:[],RB:[],WR:[],TE:[]}; for(const o of list){ if(o.e[t]>0) by[o.pos].push(o); } for(const k in by) by[k].sort((a,b)=>b.e[t]-a.e[t]);
+    const used=[]; if(by.QB[0]) used.push(by.QB[0]); used.push(...by.RB.slice(0,2),...by.WR.slice(0,2)); if(by.TE[0]) used.push(by.TE[0]);
+    const rest=[by.RB[2],by.WR[2],by.TE[1]].filter(Boolean).sort((a,b)=>b.e[t]-a.e[t])[0]; if(rest) used.push(rest);
+    used.forEach(o=>cnt.set(o.id,(cnt.get(o.id)||0)+1));
+  } return cnt;
+}
+function applyTrade(roster,giveIds,getObjs){
+  const gs=new Set(giveIds); let after=roster.filter(q=>!gs.has(q.id)); const size=roster.length, dropped=[];
+  after=after.concat(getObjs);
+  while(after.length>size){ let k=-1,lo=1e9; for(let i=0;i<after.length;i++){ if(getObjs.includes(after[i])) continue; if(after[i].rosE<lo){lo=after[i].rosE;k=i;} } if(k<0) break; dropped.push(after[k]); after.splice(k,1); }
+  return {after,dropped};
+}
+const quant=(arr,q)=>{ const a=Float64Array.from(arr).sort(); return a[Math.min(a.length-1,Math.max(0,Math.round(q*(a.length-1))))]; };
+function gradeTrade(meT,thT,giveIds,getIds){
+  const T=tlInit(), iMe=T.teamIdx[meT], iTh=T.teamIdx[thT], meL=rosterOf(meT), thL=rosterOf(thT);
+  const giveO=giveIds.map(i=>T.pd.get(i)).filter(Boolean), getO=getIds.map(i=>T.pd.get(i)).filter(Boolean);
+  const mA=applyTrade(meL,giveO.map(o=>o.id),getO), tA=applyTrade(thL,getO.map(o=>o.id),giveO);
+  const bm=simTeam(meL,iMe), am=simTeam(mA.after,iMe), bt=simTeam(thL,iTh), at=simTeam(tA.after,iTh);
+  const gm=am.tot.map((v,i)=>v-bm.tot[i]), gt=at.tot.map((v,i)=>v-bt.tot[i]);
+  const side=(b,a,g,after,dropped)=>({before:b.mean,after:a.mean,gain:a.mean-b.mean,poGain:a.po-b.po,help:g.filter(x=>x>0).length/g.length,p10:quant(g,.1),p90:quant(g,.9),dropped});
+  return {me:side(bm,am,gm,mA.after,mA.dropped),them:side(bt,at,gt,tA.after,tA.dropped),giveO,getO,meL,thL,mA:mA.after,tA:tA.after,nW:T.nW};
+}
+function gradeLetter(gain,nW){ const w=gain/nW; return w>=2?'A':w>=.8?'B':w>=-.4?'C':w>=-1.5?'D':'F'; }
+function slotLineup(list,t){
+  const by={QB:[],RB:[],WR:[],TE:[]}; list.forEach(o=>{ if(o.e[t]>0) by[o.pos].push(o); }); for(const k in by) by[k].sort((a,b)=>b.e[t]-a.e[t]);
+  const out=[]; const take=(pos,i,label)=>{ const o=by[pos][i]; out.push({slot:label,o,v:o?o.e[t]:0}); };
+  take('QB',0,'QB'); take('RB',0,'RB1'); take('RB',1,'RB2'); take('WR',0,'WR1'); take('WR',1,'WR2'); take('TE',0,'TE');
+  const rest=[by.RB[2],by.WR[2],by.TE[1]].filter(Boolean).sort((a,b)=>b.e[t]-a.e[t])[0]; out.push({slot:'FLEX',o:rest,v:rest?rest.e[t]:0}); return out;
+}
+/* ---------- UI ---------- */
+state.tltab='grade'; state.tg={me:D.my,other:null,give:new Set(),get:new Set()}; state.tf={want:{QB:0,RB:1,WR:1,TE:0},willing:null,maxGive:2,minThem:0,minMe:10,team:'ALL',results:null,busy:false};
+const sg1=v=>(v>=0?'+':'')+v.toFixed(1);
+const gcls=l=>l==='A'||l==='B'?'up':(l==='D'||l==='F'?'down':'');
+function pickList(team,side){
+  const sel=state.tg[side];
+  return ownedList(team).map(o=>`<label class="pick"><input type="checkbox" data-side="${side}" data-id="${o.id}" ${sel.has(o.id)?'checked':''}><span class="pn">${esc(o.p.name)}</span><span class="dim">${o.pos} ${o.p.team}</span>${o.pr[0]===0&&!o.byes.includes(WK)?'<span class="tag warn" style="padding:0 6px">Out</span>':''}<span class="pv">${o.rosE.toFixed(0)}</span></label>`).join('')||'<p class="cnote">No players with stats on this roster.</p>';
+}
+const ownedList=team=>rosterOf(team).slice().sort((a,b)=>b.rosE-a.rosE);
+function renderTradeView(){
+  if(!M){ $('#main').innerHTML=`<div class="wrap"><h1 style="font-size:40px">Trade lab</h1><p class="cnote">Trade tools are not available right now.</p></div>`; return; }
+  tlInit(); const tab=state.tltab, others=D.teams.filter(t=>t!==state.tg.me);
+  if(!state.tg.other||state.tg.other===state.tg.me) state.tg.other=others[0];
+  $('#main').innerHTML=`<div class="wrap"><h1 style="font-size:40px">Trade lab</h1>
+    <p class="cnote" style="max-width:82ch;margin-top:8px">Grade a trade before you send it, or let the lab find trades that help you and the other team. Every trade is scored by what it does to each team's starting lineup (1 QB, 2 RB, 2 WR, 1 TE, 1 flex) for the rest of the season, week by week. Byes, matchups, and the chance of missing games are all counted.</p>
+    <div class="chips" role="group" aria-label="Trade lab tools" style="margin:12px 0"><button class="chip" type="button" data-tltab="grade" aria-pressed="${tab==='grade'}">Grade a trade</button><button class="chip" type="button" data-tltab="find" aria-pressed="${tab==='find'}">Find a trade</button></div>
+    <div id="tlbody">${tab==='grade'?gradeShell(others):findShell()}</div></div>`;
+  if(tab==='grade') renderGradeOut(); else renderFindOut();
+}
+function gradeShell(others){
+  const g=state.tg;
+  return `<div class="ofilters"><label>Your team <select id="tgme">${D.teams.map(t=>`<option value="${esc(t)}" ${t===g.me?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
+      <label>Trading with <select id="tgother">${others.map(t=>`<option value="${esc(t)}" ${t===g.other?'selected':''}>${esc(t)}</option>`).join('')}</select></label></div>
+    <p class="cnote">Tick the players on each side. The number on the right is each player's expected points for the rest of the season.</p>
+    <div class="two" style="align-items:start"><section class="panel"><p class="ctitle">${esc(g.me)} gives</p><div class="picks" id="pk-give">${pickList(g.me,'give')}</div></section>
+      <section class="panel"><p class="ctitle">${esc(g.other)} gives</p><div class="picks" id="pk-get">${pickList(g.other,'get')}</div></section></div>
+    <div id="tgout"></div>`;
+}
+function renderGradeOut(){
+  const box=$('#tgout'); if(!box) return; const g=state.tg;
+  if(!g.give.size||!g.get.size){ box.innerHTML=`<p class="cnote" style="margin-top:14px">Pick at least one player on each side to see the grade.</p>`; return; }
+  const r=gradeTrade(g.me,g.other,[...g.give],[...g.get]), L=gradeLetter(r.me.gain,r.nW), diff=r.me.gain-r.them.gain;
+  const winner=Math.abs(diff)<3?'It is about even.':(diff>0?`You come out ahead by about ${diff.toFixed(0)} points.`:`They come out ahead by about ${(-diff).toFixed(0)} points.`);
+  const head=r.me.gain>0&&r.them.gain>0?`Both teams improve: you gain ${r.me.gain.toFixed(0)} points and they gain ${r.them.gain.toFixed(0)}. A deal that helps both sides is the kind that gets accepted.`
+    :r.me.gain>0?`This favors you. Their lineup gets worse by ${(-r.them.gain).toFixed(0)} points, so expect pushback unless they value the names you are sending.`
+    :r.them.gain>0?`This favors them. Your lineup loses ${(-r.me.gain).toFixed(0)} points while theirs gains ${r.them.gain.toFixed(0)}.`:`Neither lineup improves. This trade mostly shuffles players.`;
+  const row=(nm,s)=>`<tr><td>${esc(nm)}</td><td>${s.before.toFixed(0)}</td><td>${s.after.toFixed(0)}</td><td class="${s.gain>=0?'up':'down'}"><b>${sg1(s.gain)}</b></td><td class="${s.gain>=0?'up':'down'}">${sg1(s.gain/r.nW)}</td><td class="${s.poGain>=0?'up':'down'}">${sg1(s.poGain)}</td><td>${Math.round(s.help*100)}%</td><td>${sg1(s.p10)} to ${sg1(s.p90)}</td></tr>`;
+  const sc1=startCounts(r.mA), sc2=startCounts(r.tA);
+  const pl=(o,own,sm)=>{ const next=o.byes.includes(WK)?'Bye':o.e[0].toFixed(1); return `<tr><td>${esc(o.p.name)}</td><td>${o.pos} ${o.p.team}</td><td>${own}</td><td><b>${o.rosE.toFixed(0)}</b></td><td>${o.healthy.toFixed(0)}</td><td>${o.po.toFixed(0)}</td><td>${next}</td><td>${sm.get(o.id)||0} of ${r.nW}</td><td>${o.byes.length?'Bye wk '+o.byes.join(', '):''}${o.pr[0]===0&&!o.byes.includes(WK)?' Out now':''}</td></tr>`; };
+  const lu=(lb,la)=>{ const A=slotLineup(lb,0), B=slotLineup(la,0); return `<table><thead><tr><th>Slot</th><th>Before</th><th>After</th><th>Next game change</th></tr></thead><tbody>${A.map((a,i)=>{const b=B[i]; const d=b.v-a.v; return `<tr><td>${a.slot}</td><td>${a.o?esc(a.o.p.name)+' <span class="dim">'+a.v.toFixed(1)+'</span>':'\u2013'}</td><td>${b.o?esc(b.o.p.name)+' <span class="dim">'+b.v.toFixed(1)+'</span>':'\u2013'}</td><td class="${d>=0?'up':'down'}">${Math.abs(d)<0.05?'':sg1(d)}</td></tr>`;}).join('')}</tbody></table>`; };
+  const dropNote=(s,nm)=>s.dropped.length?`<p class="cnote">${esc(nm)} would have to drop ${s.dropped.map(o=>esc(o.p.name)).join(', ')} to make room (the lowest-value players).</p>`:'';
+  box.innerHTML=`<h2 style="margin-top:22px">The verdict</h2>
+    <div class="panel" style="display:grid;grid-template-columns:150px 1fr;gap:20px;align-items:center"><div style="text-align:center"><div class="gradeL ${gcls(L)}">${L}</div><div class="cnote" style="margin:0">Your grade</div></div>
+      <div><p style="margin:0 0 6px;font-size:16px"><b>${head}</b></p><p style="margin:0">${winner} There is a ${Math.round(r.me.help*100)}% chance this trade actually helps you over the rest of the season. In a good case (1 in 10) you gain ${sg1(r.me.p90)} points, and in a bad case (1 in 10) you ${r.me.p10>=0?'still gain '+sg1(r.me.p10):'lose '+Math.abs(r.me.p10).toFixed(0)}.</p></div></div>
+    <div class="tablebox" style="margin-top:12px"><table><thead><tr><th>Starting-lineup points, weeks ${WK}\u2013${D.last}</th><th>Before</th><th>After</th><th>Change</th><th>Per week</th><th>Playoff weeks</th><th>Chance it helps</th><th>Range (1 in 10 each end)</th></tr></thead><tbody>${row(g.me,r.me)}${row(g.other,r.them)}</tbody></table></div>
+    ${dropNote(r.me,g.me)}${dropNote(r.them,g.other)}
+    <h2>The players</h2><div class="tablebox"><table><thead><tr><th>Player</th><th>Position</th><th>Goes to</th><th>Expected, rest of season</th><th>If healthy all games</th><th>Expected, playoff weeks</th><th>Next game</th><th>Weeks he starts for his new team</th><th>Notes</th></tr></thead><tbody>${r.giveO.map(o=>pl(o,g.other,sc2)).join('')}${r.getO.map(o=>pl(o,g.me,sc1)).join('')}</tbody></table></div>
+    <h2>Starting lineups for the next game</h2><div class="two" style="align-items:start"><div class="tablebox"><p class="ctitle" style="padding:8px 10px 0">${esc(g.me)}</p>${lu(r.meL,r.mA)}</div><div class="tablebox"><p class="ctitle" style="padding:8px 10px 0">${esc(g.other)}</p>${lu(r.thL,r.tA)}</div></div>
+    <p class="foot">How to read this: every number is points from starting lineups, not raw player totals, so depth, byes, and positions you already have count. Lineups are set from expected points and who is available. Each player can miss games at his historical rate, can run hot or cold for the rest of the season by the amount seen in past years, and has ordinary weekly luck, simulated ${NSIM} times with the same draws before and after the trade. The estimates do not assume you will cleverly swap out players who flop, so they are on the cautious side. The grade is the average change per week: A is +2 or more, B is +0.8, C is about even, D is worse than -0.4, F is worse than -1.5. Managers also care about names and gut feel, which no projection captures, and open roster spots are not refilled from free agents.</p>`;
+}
+function findShell(){
+  const f=state.tf, mine=ownedList(D.my); if(!f.willing){ f.willing=new Set(mine.slice(3).map(o=>o.id)); }
+  const sel=(pos,mx)=>`<label>${pos} <select data-want="${pos}">${Array.from({length:mx+1},(_,i)=>`<option value="${i}" ${f.want[pos]===i?'selected':''}>${i}</option>`).join('')}</select></label>`;
+  return `<section class="panel"><p class="ctitle">What are you looking for?</p><div class="ofilters" style="margin:6px 0">${sel('WR',2)}${sel('RB',2)}${sel('TE',1)}${sel('QB',1)}</div>
+      <p class="ctitle" style="margin-top:10px">Who are you willing to trade?</p><p class="cnote" style="margin:0 0 6px">Your top three players start unticked. Change it however you like.</p>
+      <div class="picks" id="pk-will">${mine.map(o=>`<label class="pick"><input type="checkbox" data-will="${o.id}" ${f.willing.has(o.id)?'checked':''}><span class="pn">${esc(o.p.name)}</span><span class="dim">${o.pos} ${o.p.team}</span><span class="pv">${o.rosE.toFixed(0)}</span></label>`).join('')}</div>
+      <div class="ofilters"><label>Most players I will give <select id="tfmax">${[1,2,3].map(n=>`<option value="${n}" ${f.maxGive===n?'selected':''}>${n}</option>`).join('')}</select></label>
+        <label>Their team must gain at least <select id="tfmin">${[[-5,'-5 points (a little worse is fine)'],[0,'0 points (not worse off)'],[5,'5 points'],[10,'10 points']].map(([v,l])=>`<option value="${v}" ${f.minThem===v?'selected':''}>${l}</option>`).join('')}</select></label>
+        <label>I want to gain at least <select id="tfminme">${[[5,'5 points'],[10,'10 points'],[20,'20 points'],[40,'40 points']].map(([v,l])=>`<option value="${v}" ${f.minMe===v?'selected':''}>${l}</option>`).join('')}</select></label>
+        <label>Trade with <select id="tfteam"><option value="ALL">Any team</option>${D.teams.filter(t=>t!==D.my).map(t=>`<option value="${esc(t)}" ${f.team===t?'selected':''}>${esc(t)}</option>`).join('')}</select></label>
+        <button type="button" class="pin" id="dofind" style="padding:9px 16px">Find trades</button></div></section><div id="findout"></div>`;
+}
+function renderFindOut(){
+  const box=$('#findout'); if(!box) return; const f=state.tf;
+  if(f.busy){ box.innerHTML=`<p class="cnote" style="margin-top:14px">Searching every team for trades that work for both sides\u2026</p>`; return; }
+  if(!f.results){ box.innerHTML=''; return; }
+  if(!f.results.length){ box.innerHTML=`<p class="cnote" style="margin-top:14px">No trades found where every player you ask for would actually start for you, you gain what you asked for, and the other team meets its minimum. Try ticking more players you would trade, a lower minimum gain, or letting their team gain a little less.</p>`; return; }
+  box.innerHTML=`<h2 style="margin-top:22px">Trades worth sending</h2><p class="cnote">Ranked by how much they help you, only counting trades where the other team does not get worse (or meets your minimum).</p>`+
+   f.results.map((x,i)=>`<section class="panel" style="margin-bottom:10px"><div class="projtop"><div><p class="ctitle" style="font-size:16px;margin:0">${i+1}. Trade with ${esc(x.team)}</p>
+     <p style="margin:4px 0 0"><b>You give:</b> ${x.S.map(o=>`${esc(o.p.name)} <span class="dim">${o.pos}</span>`).join(', ')}<br><b>You get:</b> ${x.G.map(o=>`${esc(o.p.name)} <span class="dim">${o.pos}</span>`).join(', ')}</p></div>
+     <div style="text-align:right"><div class="gradeL ${gcls(x.L)}" style="font-size:44px">${x.L}</div><div class="cnote" style="margin:0">Your grade</div></div></div>
+     <div class="pnum" style="grid-template-columns:repeat(4,1fr);margin-top:8px"><div><div class="v up" style="font-size:28px">${sg1(x.me.gain)}</div><div class="l">Your gain, rest of season</div></div><div><div class="v ${x.them.gain>=0?'up':'down'}" style="font-size:28px">${sg1(x.them.gain)}</div><div class="l">Their gain</div></div><div><div class="v" style="font-size:28px">${Math.round(x.me.help*100)}%</div><div class="l">Chance it helps you</div></div><div><div class="v" style="font-size:22px">${sg1(x.me.p10)} to ${sg1(x.me.p90)}</div><div class="l">Your range (1 in 10 each end)</div></div></div>
+     <p class="cnote" style="margin:8px 0">${esc(x.why)}</p><button type="button" class="chip" data-opengrade="${i}">Open in the grader</button></section>`).join('');
+}
+function whyText(r){ const A=slotLineup(r.meL,0), B=slotLineup(r.mA,0), ch=[]; A.forEach((a,i)=>{ const b=B[i]; if(b.o&&(!a.o||a.o.id!==b.o.id)&&b.v-a.v>0.5) ch.push(`${a.slot}: ${a.o?a.o.p.name:'empty'} \u2192 ${b.o.p.name} (${sg1(b.v-a.v)})`); });
+  return ch.length?`Your next lineup: ${ch.slice(0,3).join('; ')}.`:`The gain comes from depth, byes, and the playoff schedule more than from this week's lineup.`; }
+function runFind(){
+  const T=tlInit(), f=state.tf, me=D.my, meL=rosterOf(me), willing=meL.filter(o=>f.willing.has(o.id)), wants=[];
+  for(const pos of ['QB','RB','WR','TE']) for(let i=0;i<f.want[pos];i++) wants.push(pos);
+  if(!wants.length||!willing.length){ f.results=[]; f.busy=false; renderFindOut(); return; }
+  const myBefore=detTeam(meL).total, subs=[];
+  (function rec(st,cur){ if(cur.length) subs.push(cur.slice()); if(cur.length===f.maxGive) return; for(let i=st;i<willing.length;i++){ cur.push(willing[i]); rec(i+1,cur); cur.pop(); } })(0,[]);
+  const cands=[];
+  for(const team of D.teams){
+    if(team===me||(f.team!=='ALL'&&f.team!==team)) continue;
+    const thL=rosterOf(team), thBefore=detTeam(thL).total, pools={};
+    for(const pos of ['QB','RB','WR','TE']) pools[pos]=thL.filter(o=>o.pos===pos&&o.rosE>0).sort((a,b)=>b.rosE-a.rosE).slice(0,6);
+    const combos=[]; (function rec(i,cur){ if(i===wants.length){ combos.push(cur.slice()); return; } for(const o of pools[wants[i]]){ if(cur.includes(o)) continue; if(i>0&&wants[i]===wants[i-1]&&o.rosE>cur[i-1].rosE) continue; cur.push(o); rec(i+1,cur); cur.pop(); } })(0,[]);
+    for(const G of combos){ const gv=G.reduce((s,o)=>s+o.rosE,0);
+      for(const S of subs){ const sv=S.reduce((s,o)=>s+o.rosE,0); if(sv<.35*gv||sv>3*gv) continue;
+        const mA=applyTrade(meL,S.map(o=>o.id),G).after, myGain=detTeam(mA).total-myBefore; if(myGain<f.minMe) continue;
+        const tA=applyTrade(thL,G.map(o=>o.id),S).after, thGain=detTeam(tA).total-thBefore; if(thGain<f.minThem-0.5) continue;
+        const sc0=startCounts(mA); if(G.some(o=>(sc0.get(o.id)||0)<4)) continue;
+        cands.push({team,S,G,myGain,thGain}); } } }
+  /* for the same players coming back, keep the version that gives up the least (extra throw-ins just thin your bench) */
+  const best=new Map(); for(const c of cands){ const k=c.team+'|'+c.G.map(o=>o.id).sort().join(','), sv=c.S.reduce((s,o)=>s+o.rosE,0), sc=c.myGain-0.03*sv, b=best.get(k); if(!b||sc>b.sc) best.set(k,Object.assign(c,{sc})); }
+  const ranked=[...best.values()].sort((a,b)=>b.sc-a.sc); const per={}, top=[];
+  for(const c of ranked){ per[c.team]=(per[c.team]||0)+1; if(per[c.team]<=8) top.push(c); if(top.length>=60) break; }
+  const out=[];
+  for(const c of top){ const r=gradeTrade(me,c.team,c.S.map(o=>o.id),c.G.map(o=>o.id)); if(r.me.gain<f.minMe*0.6||r.them.gain<f.minThem) continue; out.push({team:c.team,S:c.S,G:c.G,me:r.me,them:r.them,L:gradeLetter(r.me.gain,r.nW),why:whyText(r)}); }
+  out.sort((a,b)=>b.me.gain-a.me.gain); const cnt={}; f.results=out.filter(x=>{ cnt[x.team]=(cnt[x.team]||0)+1; return cnt[x.team]<=3; }).slice(0,10);
+  f.busy=false; renderFindOut();
+}
+document.addEventListener('click',e=>{
+  const tb=e.target.closest('[data-tltab]'); if(tb){ state.tltab=tb.dataset.tltab; renderTradeView(); return; }
+  if(e.target.closest('#dofind')){ state.tf.busy=true; renderFindOut(); setTimeout(runFind,30); return; }
+  const og=e.target.closest('[data-opengrade]'); if(og){ const x=state.tf.results[+og.dataset.opengrade]; state.tg={me:D.my,other:x.team,give:new Set(x.S.map(o=>o.id)),get:new Set(x.G.map(o=>o.id))}; state.tltab='grade'; renderTradeView(); }
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='tgme'){ state.tg={me:t.value,other:null,give:new Set(),get:new Set()}; renderTradeView(); return; }
+  if(t.id==='tgother'){ state.tg.other=t.value; state.tg.get=new Set(); renderTradeView(); return; }
+  if(t.dataset&&t.dataset.side){ const s=state.tg[t.dataset.side]; if(t.checked) s.add(t.dataset.id); else s.delete(t.dataset.id); renderGradeOut(); return; }
+  if(t.dataset&&t.dataset.want){ state.tf.want[t.dataset.want]=+t.value; state.tf.results=null; renderFindOut(); return; }
+  if(t.dataset&&t.dataset.will){ if(t.checked) state.tf.willing.add(t.dataset.will); else state.tf.willing.delete(t.dataset.will); state.tf.results=null; renderFindOut(); return; }
+  if(t.id==='tfmax'){ state.tf.maxGive=+t.value; state.tf.results=null; renderFindOut(); return; }
+  if(t.id==='tfminme'){ state.tf.minMe=+t.value; state.tf.results=null; renderFindOut(); return; }
+  if(t.id==='tfmin'){ state.tf.minThem=+t.value; state.tf.results=null; renderFindOut(); return; }
+  if(t.id==='tfteam'){ state.tf.team=t.value; state.tf.results=null; renderFindOut(); }
+});
 
 function btNote(){ if(!M) return 'Projections are a rough guide.';
   const cv=M.cv, avg=k=>cv.reduce((x,c)=>x+c[k],0)/cv.length, rc=M.ros_check;

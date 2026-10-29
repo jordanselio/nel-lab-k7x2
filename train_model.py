@@ -165,6 +165,8 @@ model['avail'] = avail
 
 # ---------------- rest-of-season check: does counting availability help? ----------------
 print('Checking rest-of-season totals...')
+rat = {p: (D[D.pos == p].actual/D[D.pos == p].base)[D[D.pos == p].base > 2].values for p in ('QB', 'RB', 'WR', 'TE')}
+rng = np.random.default_rng(1); chk2 = []
 chk = []
 for S in SEASONS:
     df = load_season(S); sched = {}
@@ -176,11 +178,21 @@ for S in SEASONS:
             w = .9**(cut-1-pr.week.values); w = w/w.sum(); b = (pr.ppr.values*w).sum()
             wks = [W for W in range(cut, 19) if W in sched.get(t, set())]
             if len(wks) < 4: continue
-            chk.append((g[g.week.isin(wks)].ppr.sum(), b*len(wks), sum(avail['healthy'][pos][min(W-cut, 16)]*b for W in wks)))
+            Ps = np.array([avail['healthy'][pos][min(W-cut, 16)] for W in wks]); act = float(g[g.week.isin(wks)].ppr.sum())
+            chk.append((act, b*len(wks), float((Ps*b).sum())))
+            sim = ((rng.random((300, len(wks))) < Ps)*(rng.choice(rat[pos], (300, len(wks)))*b)).sum(1); chk2.append((pos, act, float((Ps*b).sum()), float(sim.std())))
 c = np.array(chk)
 model['ros_check'] = dict(n=int(len(c)), mae_ignore=round(float(np.abs(c[:, 0]-c[:, 1]).mean()), 1), mae_with=round(float(np.abs(c[:, 0]-c[:, 2]).mean()), 1),
                           bias_ignore=round(float((c[:, 1]-c[:, 0]).mean()), 1), bias_with=round(float((c[:, 2]-c[:, 0]).mean()), 1))
 print('  ', model['ros_check'])
+# how much do rest-of-season totals vary beyond injuries and weekly luck? (role changes, slumps, breakouts, long injuries)
+C2 = pd.DataFrame(chk2, columns=['pos', 'act', 'pred', 'simsd'])
+model['weekly_sd'] = {p: round(float(np.std(rat[p])), 3) for p in rat}
+model['persist_sd'] = {}
+for p, g_ in C2.groupby('pos'):
+    var_act = (((g_.act-g_.pred)/g_.pred)**2).mean(); var_sim = ((g_.simsd/g_.pred)**2).mean()
+    model['persist_sd'][p] = round(float(max(var_act-var_sim, 0)**.5), 3)
+print('  weekly luck sd:', model['weekly_sd'], ' extra season-long sd:', model['persist_sd'])
 json.dump(model, open(HERE/'model.json', 'w'), indent=1)
 
 # ---------------- "similar games" odds data ----------------
