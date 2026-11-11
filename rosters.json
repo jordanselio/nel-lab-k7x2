@@ -2,11 +2,136 @@
  "my_team": "O-Bijan Kenobi",
  "notes": "Edit this file when rosters change. Each player is [name, slot, injury tag]. Slot is Starter, Bench, IR, or Unknown. Injury tag can be empty. Names should match NFL names (Jr./Sr./III suffixes are ignored).",
  "teams": {
-  "Fisher's Fantastic Team": {
-   "record": "4-3-0",
+  "Packing Packers": {
+   "record": "7-2-0",
    "players": [
     [
-     "Trevor Lawrence",
+     "Josh Allen",
+     "Starter",
+     ""
+    ],
+    [
+     "Jahmyr Gibbs",
+     "Starter",
+     ""
+    ],
+    [
+     "Jaylen Warren",
+     "Starter",
+     ""
+    ],
+    [
+     "Tetairoa McMillan",
+     "Starter",
+     ""
+    ],
+    [
+     "Tee Higgins",
+     "Starter",
+     ""
+    ],
+    [
+     "Tyler Warren",
+     "Starter",
+     ""
+    ],
+    [
+     "Juwan Johnson",
+     "Starter",
+     ""
+    ],
+    [
+     "Luther Burden III",
+     "Bench",
+     "Q"
+    ],
+    [
+     "Sam Darnold",
+     "Bench",
+     "O"
+    ],
+    [
+     "Braelon Allen",
+     "Bench",
+     ""
+    ],
+    [
+     "Tre Tucker",
+     "Bench",
+     ""
+    ]
+   ]
+  },
+  "Aaron's Astounding Team": {
+   "record": "7-2-0",
+   "players": [
+    [
+     "Jared Goff",
+     "Starter",
+     ""
+    ],
+    [
+     "Derrick Henry",
+     "Starter",
+     ""
+    ],
+    [
+     "Quinshon Judkins",
+     "Starter",
+     ""
+    ],
+    [
+     "Jaxon Smith-Njigba",
+     "Starter",
+     ""
+    ],
+    [
+     "Jameson Williams",
+     "Starter",
+     ""
+    ],
+    [
+     "Trey McBride",
+     "Starter",
+     ""
+    ],
+    [
+     "Breece Hall",
+     "Starter",
+     ""
+    ],
+    [
+     "Kyle Pitts Sr.",
+     "Bench",
+     ""
+    ],
+    [
+     "Blake Corum",
+     "Bench",
+     ""
+    ],
+    [
+     "Khalil Shakir",
+     "Bench",
+     ""
+    ],
+    [
+     "Malik Washington",
+     "Bench",
+     ""
+    ],
+    [
+     "J.J. McCarthy",
+     "Bench",
+     "Q"
+    ]
+   ]
+  },
+  "Fisher's Fantastic Team": {
+   "record": "5-4-0",
+   "players": [
+    [
+     "Brock Purdy",
      "Starter",
      ""
     ],
@@ -26,17 +151,17 @@
      ""
     ],
     [
-     "Puka Nacua",
-     "Starter",
-     ""
-    ],
-    [
-     "Dallas Goedert",
-     "Starter",
-     ""
-    ],
-    [
      "KC Concepcion",
+     "Starter",
+     ""
+    ],
+    [
+     "Dalton Kincaid",
+     "Starter",
+     ""
+    ],
+    [
+     "Tony Pollard",
      "Starter",
      ""
     ],
@@ -46,369 +171,104 @@
      "Q"
     ],
     [
+     "Trevor Lawrence",
+     "Bench",
+     ""
+    ],
+    [
+     "Dallas Goedert",
+     "Bench",
+     ""
+    ],
+    [
+     "Puka Nacua",
+     "Bench",
+     "D"
+    ],
+    [
+     "Josh Downs",
+     "Bench",
+     ""
+    ]
+   ]
+  },
+  "OTC": {
+   "record": "3-6-0",
+   "players": [
+    [
+     "Drew Lock",
+     "Starter",
+     "Q"
+    ],
+    [
+     "Ollie Gordon II",
+     "Starter",
+     ""
+    ],
+    [
+     "Kenneth Walker III",
+     "Starter",
+     ""
+    ],
+    [
+     "DJ Moore",
+     "Starter",
+     ""
+    ],
+    [
+     "Matthew Golden",
+     "Starter",
+     ""
+    ],
+    [
+     "Isaiah Likely",
+     "Starter",
+     ""
+    ],
+    [
+     "Woody Marks",
+     "Starter",
+     ""
+    ],
+    [
+     "David Montgomery",
+     "Bench",
+     "Q"
+    ],
+    [
+     "Caleb Williams",
+     "Bench",
+     ""
+    ],
+    [
+     "Stefon Diggs",
+     "Bench",
+     ""
+    ],
+    [
      "J.K. Dobbins",
      "Bench",
      ""
     ],
     [
-     "Brock Purdy",
+     "Kaelon Black",
      "Bench",
      ""
     ],
     [
-     "Dalton Kincaid",
-     "Bench",
-     "Q"
-    ],
-    [
-     "Tony Pollard",
-     "Bench",
-     ""
-    ]
-   ]
-  },
-  "Sandlin Dynasty": {
-   "record": "4-3-0",
-   "players": [
-    [
-     "Lamar Jackson",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Saquon Barkley",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Chuba Hubbard",
-     "Starter",
-     ""
-    ],
-    [
-     "Justin Jefferson",
-     "Starter",
-     ""
-    ],
-    [
-     "Garrett Wilson",
-     "Starter",
-     ""
-    ],
-    [
-     "George Kittle",
-     "Starter",
-     ""
-    ],
-    [
-     "George Pickens",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Marvin Harrison Jr.",
-     "Bench",
-     ""
-    ],
-    [
-     "Alvin Kamara",
-     "Bench",
-     ""
-    ],
-    [
-     "Keenan Allen",
-     "Bench",
-     ""
-    ],
-    [
-     "Christian Kirk",
-     "Bench",
-     ""
-    ],
-    [
-     "Jonah Coleman",
-     "Bench",
-     ""
-    ],
-    [
-     "Deebo Samuel Sr.",
+     "A.J. Brown",
      "IR",
      "Q"
-    ]
-   ]
-  },
-  "David's Daring Team": {
-   "record": "4-3-0",
-   "players": [
-    [
-     "C.J. Stroud",
-     "Starter",
-     ""
-    ],
-    [
-     "Jordan Mason",
-     "Starter",
-     ""
-    ],
-    [
-     "Emanuel Wilson",
-     "Starter",
-     ""
-    ],
-    [
-     "Carnell Tate",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Amon-Ra St. Brown",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Sam LaPorta",
-     "Starter",
-     ""
-    ],
-    [
-     "DK Metcalf",
-     "Starter",
-     ""
-    ],
-    [
-     "Emeka Egbuka",
-     "Bench",
-     "Q"
-    ],
-    [
-     "Kenny Gainwell",
-     "Bench",
-     "Q"
-    ],
-    [
-     "Quentin Johnston",
-     "Bench",
-     ""
-    ],
-    [
-     "Omarion Hampton",
-     "Bench",
-     ""
-    ],
-    [
-     "Tyler Allgeier",
-     "Bench",
-     "Q"
-    ],
-    [
-     "Davante Adams",
-     "IR",
-     "IR"
-    ]
-   ]
-  },
-  "O-Bijan Kenobi": {
-   "record": "2-5-0",
-   "players": [
-    [
-     "Dak Prescott",
-     "Starter",
-     ""
-    ],
-    [
-     "Bijan Robinson",
-     "Starter",
-     ""
-    ],
-    [
-     "D'Andre Swift",
-     "Starter",
-     ""
-    ],
-    [
-     "Jaylen Waddle",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Jordan Addison",
-     "Starter",
-     ""
-    ],
-    [
-     "Hunter Henry",
-     "Starter",
-     ""
-    ],
-    [
-     "RJ Harvey",
-     "Starter",
-     ""
-    ],
-    [
-     "Nico Collins",
-     "Bench",
-     ""
-    ],
-    [
-     "Chris Olave",
-     "Bench",
-     ""
-    ],
-    [
-     "Harold Fannin Jr.",
-     "Bench",
-     ""
-    ],
-    [
-     "Bryce Young",
-     "Bench",
-     ""
-    ],
-    [
-     "Roman Wilson",
-     "IR",
-     "IR"
-    ]
-   ]
-  },
-  "McHollywoooooood": {
-   "record": "2-5-0",
-   "players": [
-    [
-     "Zach Charbonnet",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Rachaad White",
-     "Starter",
-     ""
-    ],
-    [
-     "Jalen Coker",
-     "Starter",
-     ""
-    ],
-    [
-     "Germie Bernard",
-     "Starter",
-     ""
-    ],
-    [
-     "Travis Kelce",
-     "Starter",
-     ""
-    ],
-    [
-     "Denzel Boston",
-     "Starter",
-     ""
-    ],
-    [
-     "Christian McCaffrey",
-     "Bench",
-     "Q"
-    ],
-    [
-     "Kalif Raymond",
-     "Bench",
-     ""
-    ],
-    [
-     "Mike Gesicki",
-     "Bench",
-     ""
-    ],
-    [
-     "Jaylin Noel",
-     "Bench",
-     "IR"
-    ],
-    [
-     "Tyler Shough",
-     "Bench",
-     ""
-    ],
-    [
-     "Aaron Jones Sr.",
-     "Bench",
-     "Q"
-    ]
-   ]
-  },
-  "Andrew's Awesome Team": {
-   "record": "2-5-0",
-   "players": [
-    [
-     "Jayden Daniels",
-     "Starter",
-     ""
-    ],
-    [
-     "Jeremiyah Love",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Josh Jacobs",
-     "Starter",
-     ""
-    ],
-    [
-     "Michael Wilson",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Ja'Marr Chase",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Michael Mayer",
-     "Starter",
-     ""
-    ],
-    [
-     "Rashee Rice",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Cam Skattebo",
-     "Bench",
-     "Q"
-    ],
-    [
-     "Makai Lemon",
-     "Bench",
-     ""
-    ],
-    [
-     "Kyle Monangai",
-     "Bench",
-     "Q"
-    ],
-    [
-     "Xavier Worthy",
-     "Bench",
-     ""
-    ],
-    [
-     "Aaron Rodgers",
-     "Bench",
-     ""
     ]
    ]
   },
   "Jack Steiner": {
-   "record": "3-4-0",
+   "record": "3-6-0",
    "players": [
     [
-     "Jordan Love",
+     "Patrick Mahomes",
      "Starter",
-     ""
+     "Q"
     ],
     [
      "Ashton Jeanty",
@@ -426,19 +286,19 @@
      ""
     ],
     [
-     "Jakobi Meyers",
+     "Malik Nabers",
      "Starter",
-     "Q"
+     ""
     ],
     [
-     "Colston Loveland",
+     "Brenton Strange",
      "Starter",
      ""
     ],
     [
      "Omar Cooper Jr.",
      "Starter",
-     ""
+     "Q"
     ],
     [
      "Travis Etienne Jr.",
@@ -446,22 +306,22 @@
      "IR"
     ],
     [
+     "Colston Loveland",
+     "Bench",
+     ""
+    ],
+    [
      "Mike Evans",
      "Bench",
      "Q"
     ],
     [
-     "Patrick Mahomes",
+     "Jordan Love",
      "Bench",
      ""
     ],
     [
-     "Brenton Strange",
-     "Bench",
-     ""
-    ],
-    [
-     "Malik Nabers",
+     "Corey Kiner",
      "Bench",
      ""
     ],
@@ -472,8 +332,343 @@
     ]
    ]
   },
+  "McHollywoooooood": {
+   "record": "2-7-0",
+   "players": [
+    [
+     "Kirk Cousins",
+     "Starter",
+     ""
+    ],
+    [
+     "Christian McCaffrey",
+     "Starter",
+     ""
+    ],
+    [
+     "Zach Charbonnet",
+     "Starter",
+     ""
+    ],
+    [
+     "Denzel Boston",
+     "Starter",
+     "Q"
+    ],
+    [
+     "Jalen Coker",
+     "Starter",
+     ""
+    ],
+    [
+     "Travis Kelce",
+     "Starter",
+     ""
+    ],
+    [
+     "Adonai Mitchell",
+     "Starter",
+     ""
+    ],
+    [
+     "Rachaad White",
+     "Bench",
+     ""
+    ],
+    [
+     "Tyler Shough",
+     "Bench",
+     ""
+    ],
+    [
+     "Aaron Jones Sr.",
+     "Bench",
+     ""
+    ],
+    [
+     "Ryan Flournoy",
+     "Bench",
+     ""
+    ],
+    [
+     "Mack Hollins",
+     "Bench",
+     ""
+    ]
+   ]
+  },
+  "O-Bijan Kenobi": {
+   "record": "4-5-0",
+   "players": [
+    [
+     "Bryce Young",
+     "Starter",
+     ""
+    ],
+    [
+     "Bijan Robinson",
+     "Starter",
+     ""
+    ],
+    [
+     "Justice Hill",
+     "Starter",
+     ""
+    ],
+    [
+     "Nico Collins",
+     "Starter",
+     ""
+    ],
+    [
+     "Chris Olave",
+     "Starter",
+     ""
+    ],
+    [
+     "Harold Fannin Jr.",
+     "Starter",
+     ""
+    ],
+    [
+     "DeMario Douglas",
+     "Starter",
+     ""
+    ],
+    [
+     "Jaylen Waddle",
+     "Bench",
+     "Q"
+    ],
+    [
+     "D'Andre Swift",
+     "Bench",
+     ""
+    ],
+    [
+     "Dak Prescott",
+     "Bench",
+     ""
+    ],
+    [
+     "Jordan Addison",
+     "Bench",
+     ""
+    ],
+    [
+     "Mike Washington Jr.",
+     "Bench",
+     ""
+    ]
+   ]
+  },
+  "Injured Reserve": {
+   "record": "4-5-0",
+   "players": [
+    [
+     "Jayden Daniels",
+     "Starter",
+     ""
+    ],
+    [
+     "Audric Estime",
+     "Starter",
+     ""
+    ],
+    [
+     "Kaleb Johnson",
+     "Starter",
+     ""
+    ],
+    [
+     "Makai Lemon",
+     "Starter",
+     ""
+    ],
+    [
+     "Ja'Marr Chase",
+     "Starter",
+     ""
+    ],
+    [
+     "Michael Mayer",
+     "Starter",
+     ""
+    ],
+    [
+     "Rashee Rice",
+     "Starter",
+     ""
+    ],
+    [
+     "Cam Skattebo",
+     "Bench",
+     "O"
+    ],
+    [
+     "Josh Jacobs",
+     "Bench",
+     "Q"
+    ],
+    [
+     "Kyle Monangai",
+     "Bench",
+     "O"
+    ],
+    [
+     "Xavier Worthy",
+     "Bench",
+     "Q"
+    ],
+    [
+     "Jeremiyah Love",
+     "IR",
+     "IR"
+    ]
+   ]
+  },
+  "David's Daring Team": {
+   "record": "4-5-0",
+   "players": [
+    [
+     "C.J. Stroud",
+     "Starter",
+     ""
+    ],
+    [
+     "Omarion Hampton",
+     "Starter",
+     ""
+    ],
+    [
+     "Tyler Allgeier",
+     "Starter",
+     ""
+    ],
+    [
+     "Emeka Egbuka",
+     "Starter",
+     ""
+    ],
+    [
+     "Zay Flowers",
+     "Starter",
+     ""
+    ],
+    [
+     "Sam LaPorta",
+     "Starter",
+     ""
+    ],
+    [
+     "Devaughn Vele",
+     "Starter",
+     ""
+    ],
+    [
+     "DK Metcalf",
+     "Bench",
+     ""
+    ],
+    [
+     "Kenny Gainwell",
+     "Bench",
+     ""
+    ],
+    [
+     "Jordan Mason",
+     "Bench",
+     ""
+    ],
+    [
+     "Emanuel Wilson",
+     "Bench",
+     ""
+    ],
+    [
+     "Carnell Tate",
+     "Bench",
+     "Q"
+    ],
+    [
+     "Davante Adams",
+     "IR",
+     "IR"
+    ]
+   ]
+  },
+  "Mario's Magnificent Team": {
+   "record": "5-4-0",
+   "players": [
+    [
+     "Drake Maye",
+     "Starter",
+     ""
+    ],
+    [
+     "Jonathan Taylor",
+     "Starter",
+     ""
+    ],
+    [
+     "Chase Brown",
+     "Starter",
+     ""
+    ],
+    [
+     "Christian Watson",
+     "Starter",
+     ""
+    ],
+    [
+     "Amon-Ra St. Brown",
+     "Starter",
+     ""
+    ],
+    [
+     "Tucker Kraft",
+     "Starter",
+     ""
+    ],
+    [
+     "Jadarian Price",
+     "Starter",
+     ""
+    ],
+    [
+     "Rhamondre Stevenson",
+     "Bench",
+     "D"
+    ],
+    [
+     "TreVeyon Henderson",
+     "Bench",
+     "Q"
+    ],
+    [
+     "Jordyn Tyson",
+     "Bench",
+     ""
+    ],
+    [
+     "T.J. Hockenson",
+     "Bench",
+     ""
+    ],
+    [
+     "Tank Dell",
+     "Bench",
+     ""
+    ],
+    [
+     "DeVonta Smith",
+     "IR",
+     "O"
+    ]
+   ]
+  },
   "Jordan's Scary Team": {
-   "record": "3-4-0",
+   "record": "5-4-0",
    "players": [
     [
      "Joe Burrow",
@@ -503,7 +698,7 @@
     [
      "Brock Bowers",
      "Starter",
-     "Q"
+     ""
     ],
     [
      "Chris Godwin Jr.",
@@ -532,256 +727,71 @@
     ]
    ]
   },
-  "OTC": {
-   "record": "2-5-0",
+  "Sandlin Dynasty": {
+   "record": "5-4-0",
    "players": [
     [
-     "Caleb Williams",
+     "Fernando Mendoza",
      "Starter",
      ""
     ],
     [
-     "Ollie Gordon II",
+     "Chuba Hubbard",
      "Starter",
      ""
     ],
     [
-     "Kenneth Walker III",
+     "Jonah Coleman",
      "Starter",
      ""
     ],
     [
-     "A.J. Brown",
+     "Justin Jefferson",
      "Starter",
      ""
     ],
     [
-     "Matthew Golden",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Mark Andrews",
-     "Starter",
-     ""
-    ],
-    [
-     "DJ Moore",
+     "Garrett Wilson",
      "Starter",
      "Q"
     ],
     [
-     "David Montgomery",
-     "Bench",
-     "Q"
-    ],
-    [
-     "Isaiah Likely",
-     "Bench",
-     ""
-    ],
-    [
-     "Woody Marks",
-     "Bench",
-     ""
-    ],
-    [
-     "Tre Tucker",
-     "Bench",
-     ""
-    ],
-    [
-     "Stefon Diggs",
-     "Bench",
-     "Q"
-    ]
-   ]
-  },
-  "Aaron's Astounding Team": {
-   "record": "6-1-0",
-   "players": [
-    [
-     "Jared Goff",
+     "George Kittle",
      "Starter",
      ""
     ],
     [
-     "Derrick Henry",
-     "Starter",
-     ""
-    ],
-    [
-     "Breece Hall",
+     "George Pickens",
      "Starter",
      "Q"
     ],
     [
-     "Jaxon Smith-Njigba",
-     "Starter",
-     ""
-    ],
-    [
-     "Jameson Williams",
-     "Starter",
-     ""
-    ],
-    [
-     "Trey McBride",
-     "Starter",
-     ""
-    ],
-    [
-     "Blake Corum",
-     "Starter",
-     ""
-    ],
-    [
-     "Quinshon Judkins",
+     "Saquon Barkley",
      "Bench",
      ""
     ],
     [
-     "Kyle Pitts Sr.",
+     "Alvin Kamara",
      "Bench",
      ""
     ],
     [
-     "Khalil Shakir",
-     "Bench",
-     ""
-    ],
-    [
-     "Malik Washington",
+     "Deebo Samuel Sr.",
      "Bench",
      "Q"
     ],
     [
-     "J.J. McCarthy",
-     "Bench",
-     ""
-    ]
-   ]
-  },
-  "Packing Packers": {
-   "record": "5-2-0",
-   "players": [
-    [
-     "Josh Allen",
-     "Starter",
-     ""
-    ],
-    [
-     "Jahmyr Gibbs",
-     "Starter",
-     ""
-    ],
-    [
-     "Jaylen Warren",
-     "Starter",
-     ""
-    ],
-    [
-     "Tetairoa McMillan",
-     "Starter",
-     ""
-    ],
-    [
-     "Luther Burden III",
-     "Starter",
-     ""
-    ],
-    [
-     "Tyler Warren",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Tee Higgins",
-     "Starter",
-     ""
-    ],
-    [
-     "Juwan Johnson",
+     "Keenan Allen",
      "Bench",
      ""
     ],
     [
-     "Sam Darnold",
+     "Bo Nix",
      "Bench",
      ""
     ],
     [
-     "Braelon Allen",
-     "Bench",
-     "Q"
-    ],
-    [
-     "Caleb Douglas",
-     "Bench",
-     ""
-    ]
-   ]
-  },
-  "Mario's Magnificent Team": {
-   "record": "5-2-0",
-   "players": [
-    [
-     "Drake Maye",
-     "Starter",
-     ""
-    ],
-    [
-     "Jonathan Taylor",
-     "Starter",
-     ""
-    ],
-    [
-     "Chase Brown",
-     "Starter",
-     ""
-    ],
-    [
-     "Zay Flowers",
-     "Starter",
-     ""
-    ],
-    [
-     "Christian Watson",
-     "Starter",
-     ""
-    ],
-    [
-     "Tucker Kraft",
-     "Starter",
-     ""
-    ],
-    [
-     "DeVonta Smith",
-     "Starter",
-     "Q"
-    ],
-    [
-     "Rhamondre Stevenson",
-     "Bench",
-     ""
-    ],
-    [
-     "TreVeyon Henderson",
-     "Bench",
-     ""
-    ],
-    [
-     "T.J. Hockenson",
-     "Bench",
-     ""
-    ],
-    [
-     "Kyler Murray",
-     "Bench",
-     ""
-    ],
-    [
-     "Jordyn Tyson",
+     "Lamar Jackson",
      "IR",
      "IR"
     ]
